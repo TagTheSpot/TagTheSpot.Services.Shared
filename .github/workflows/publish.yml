@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -25,14 +27,31 @@ jobs:
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
 
-      - name: Pack all shared libraries
+      - name: Find changed projects
+        id: changed
         run: |
+          CHANGED_PROJECTS=""
           for proj in $(find . -name "TagTheSpot.Services.Shared.*.csproj"); do
-            echo "Packing $proj"
-            dotnet pack "$proj" --configuration Release --no-build -p:PackageVersion=1.0.$GITHUB_RUN_NUMBER
+            if git diff --quiet HEAD~1 HEAD -- "$proj"; then
+              echo "No changes in $proj"
+            else
+              echo "Changed: $proj"
+              CHANGED_PROJECTS="$CHANGED_PROJECTS $proj"
+            fi
+          done
+          echo "projects=$CHANGED_PROJECTS" >> $GITHUB_OUTPUT
+
+      - name: Pack changed libraries using .csproj version
+        if: steps.changed.outputs.projects != ''
+        run: |
+          for proj in ${{ steps.changed.outputs.projects }}; do
+            VERSION=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "$proj")
+            echo "Packing $proj with version $VERSION"
+            dotnet pack "$proj" --configuration Release --no-build -p:PackageVersion=$VERSION
           done
 
-      - name: Push all packages to NuGet
+      - name: Push changed packages to NuGet
+        if: steps.changed.outputs.projects != ''
         run: |
           for pkg in $(find . -name "*.nupkg"); do
             echo "Pushing $pkg"
