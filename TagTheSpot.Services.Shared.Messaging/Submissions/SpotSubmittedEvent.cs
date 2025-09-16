@@ -1,6 +1,6 @@
-﻿using TagTheSpot.Services.Shared.Messaging.Events.Abstractions;
+﻿using TagTheSpot.Services.Shared.Messaging.Abstractions;
 
-namespace TagTheSpot.Services.Shared.Messaging.Events.Submissions
+namespace TagTheSpot.Services.Shared.Messaging.Submissions
 {
     public sealed record SpotSubmittedEvent(
         Guid SubmissionId,

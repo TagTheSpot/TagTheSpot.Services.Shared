@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TagTheSpot.Services.Shared.Messaging.Options
+namespace TagTheSpot.Services.Shared.Infrastructure.Options
 {
     public sealed class RabbitMqSettings
     {

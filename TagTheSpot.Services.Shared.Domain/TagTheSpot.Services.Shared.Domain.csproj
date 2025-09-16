@@ -8,11 +8,11 @@
 
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.5</Version>
-    <PackageId>TagTheSpot.Services.Shared.Messaging</PackageId>
+    <Version>1.0.0</Version>
+    <PackageId>TagTheSpot.Services.Shared.Domain</PackageId>
     <Authors>savchenkoad</Authors>
     <Company>TagTheSpot</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
-  
+
 </Project>
