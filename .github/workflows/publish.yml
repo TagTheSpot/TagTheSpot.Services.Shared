@@ -45,7 +45,7 @@ jobs:
         if: steps.changed.outputs.projects != ''
         run: |
           for proj in ${{ steps.changed.outputs.projects }}; do
-            VERSION=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "$proj")
+            VERSION=$(dotnet msbuild "$proj" -nologo -t:GetVersion -v:q /p:OutputVersion=true | grep -oP '\d+\.\d+\.\d+')
             echo "Packing $proj with version $VERSION"
             dotnet pack "$proj" --configuration Release --no-build -p:PackageVersion=$VERSION
           done
