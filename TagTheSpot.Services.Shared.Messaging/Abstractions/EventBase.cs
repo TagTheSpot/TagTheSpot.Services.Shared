@@ -1,4 +1,4 @@
-﻿namespace TagTheSpot.Services.Shared.Messaging.Events.Abstractions
+﻿namespace TagTheSpot.Services.Shared.Messaging.Abstractions
 {
     public abstract record EventBase
     {
