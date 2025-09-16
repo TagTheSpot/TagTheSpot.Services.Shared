@@ -15,4 +15,13 @@
     <ProjectReference Include="..\TagTheSpot.Services.Shared.Domain\TagTheSpot.Services.Shared.Domain.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
+    <PackageId>TagTheSpot.Services.Shared.Infrastructure</PackageId>
+    <Authors>savchenkoad</Authors>
+    <Company>TagTheSpot</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
 </Project>

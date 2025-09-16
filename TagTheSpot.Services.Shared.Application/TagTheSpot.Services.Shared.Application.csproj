@@ -19,4 +19,13 @@
     <ProjectReference Include="..\TagTheSpot.Services.Shared.Abstractions\TagTheSpot.Services.Shared.Abstractions.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
+    <PackageId>TagTheSpot.Services.Shared.Application</PackageId>
+    <Authors>savchenkoad</Authors>
+    <Company>TagTheSpot</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
 </Project>

@@ -20,4 +20,13 @@
     <ProjectReference Include="..\TagTheSpot.Services.Shared.Essentials\TagTheSpot.Services.Shared.Essentials.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
+    <PackageId>TagTheSpot.Services.Shared.API</PackageId>
+    <Authors>savchenkoad</Authors>
+    <Company>TagTheSpot</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
 </Project>

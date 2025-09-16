@@ -11,4 +11,13 @@
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
+    <PackageId>TagTheSpot.Services.Shared.Auth</PackageId>
+    <Authors>savchenkoad</Authors>
+    <Company>TagTheSpot</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
 </Project>
