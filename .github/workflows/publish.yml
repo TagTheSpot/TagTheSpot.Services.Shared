@@ -25,15 +25,11 @@ jobs:
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
 
-      - name: Pack all shared libraries using csproj version
+      - name: Pack all shared libraries
         run: |
           for proj in $(find . -name "TagTheSpot.Services.Shared.*.csproj"); do
-            version=$(dotnet msbuild "$proj" -nologo -t:GetVersion -p:DesignTimeBuild=true /v:q 2>/dev/null || \
-                      dotnet msbuild "$proj" -nologo -t:Evaluate -p:DesignTimeBuild=true -p:Property=Version /v:q)
-            # fallback: get Version property
-            version=$(dotnet msbuild "$proj" -nologo -t:Evaluate -p:Property=Version /v:q | grep -v "^\s*$")
-            echo "Packing $proj with version $version"
-            dotnet pack "$proj" --configuration Release --no-build -p:PackageVersion=$version
+            echo "Packing $proj"
+            dotnet pack "$proj" --configuration Release --no-build -p:PackageVersion=1.0.$GITHUB_RUN_NUMBER
           done
 
       - name: Push all packages to NuGet
