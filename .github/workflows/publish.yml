@@ -21,19 +21,19 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Find all csproj files
-        id: find_projects
-        run: |
-          echo "projects=$(find . -name '*.csproj')" >> $GITHUB_OUTPUT
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
-      - name: Publish each project if version not published
+      - name: Find and publish projects
         run: |
           set -e
-          for project in ${{ steps.find_projects.outputs.projects }}; do
+          projects=$(find . -name "*.csproj")
+
+          for project in $projects; do
             echo "Processing $project"
-            version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" $project)
-            packageId=$(xmllint --xpath "string(//Project/PropertyGroup/PackageId)" $project)
-            
+            version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "$project")
+            packageId=$(xmllint --xpath "string(//Project/PropertyGroup/PackageId)" "$project")
+
             if [ -z "$packageId" ]; then
               echo "No PackageId in $project, skipping..."
               continue
