@@ -13,45 +13,32 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
 
-      - name: Publish NuGet packages
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Pack all shared libraries using csproj version
         run: |
-          set -e
-          projects=$(find . -name "*.csproj")
+          for proj in $(find . -name "TagTheSpot.Services.Shared.*.csproj"); do
+            version=$(dotnet msbuild "$proj" -nologo -t:GetVersion -p:DesignTimeBuild=true /v:q 2>/dev/null || \
+                      dotnet msbuild "$proj" -nologo -t:Evaluate -p:DesignTimeBuild=true -p:Property=Version /v:q)
+            # fallback: get Version property
+            version=$(dotnet msbuild "$proj" -nologo -t:Evaluate -p:Property=Version /v:q | grep -v "^\s*$")
+            echo "Packing $proj with version $version"
+            dotnet pack "$proj" --configuration Release --no-build -p:PackageVersion=$version
+          done
 
-          for project in $projects; do
-            echo "Processing $project"
-
-            version=$(grep -oPm1 "(?<=<Version>)[^<]+" "$project")
-            packageId=$(grep -oPm1 "(?<=<PackageId>)[^<]+" "$project")
-
-            if [ -z "$packageId" ] || [ -z "$version" ]; then
-              echo "Skipping $project because PackageId or Version not found"
-              continue
-            fi
-
-            echo "Checking if $packageId $version exists on NuGet..."
-            if curl --silent --fail "https://api.nuget.org/v3-flatcontainer/${packageId,,}/${version}/${packageId,,}.nuspec" > /dev/null; then
-              echo "$packageId $version already exists. Skipping."
-              continue
-            fi
-
-            echo "Building $packageId..."
-            dotnet build "$project" -c Release --no-restore
-
-            echo "Packing $packageId $version..."
-            dotnet pack "$project" -c Release --no-build -o ./nupkgs
-
-            echo "Publishing $packageId $version..."
-            dotnet nuget push "./nupkgs/$packageId.$version.nupkg" \
-              --api-key ${{ secrets.NUGET_API_KEY }} \
-              --source https://api.nuget.org/v3/index.json \
-              --skip-duplicate
+      - name: Push all packages to NuGet
+        run: |
+          for pkg in $(find . -name "*.nupkg"); do
+            echo "Pushing $pkg"
+            dotnet nuget push "$pkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
           done
