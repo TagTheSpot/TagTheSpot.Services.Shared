@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TagTheSpot.Services.Shared.Abstractions.Options;
 
 namespace TagTheSpot.Services.Shared.Infrastructure.Options
 {
-    public sealed class RabbitMqSettings
+    public sealed class RabbitMqSettings : IAppOptions
     {
-        public const string SectionName = nameof(RabbitMqSettings);
+        public static string SectionName => nameof(RabbitMqSettings);
 
         [Required]
         public required string Host { get; init; }

@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TagTheSpot.Services.Shared.Abstractions.Options;
 
 namespace TagTheSpot.Services.Shared.Infrastructure.Options
 {
-    public sealed class DbSettings
+    public sealed class DbSettings : IAppOptions
     {
-        public const string SectionName = nameof(DbSettings);
+        public static string SectionName => nameof(DbSettings);
 
         [Required]
         public required string ConnectionString { get; init; }

@@ -1,11 +1,12 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
+using TagTheSpot.Services.Shared.Abstractions.Options;
 
 namespace TagTheSpot.Services.Shared.Auth.Options
 {
-    public sealed class JwtSettings
+    public sealed class JwtSettings : IAppOptions
     {
-        public const string SectionName = nameof(JwtSettings);
+        public static string SectionName => nameof(JwtSettings);
 
         [Required]
         [StringLength(200)]
