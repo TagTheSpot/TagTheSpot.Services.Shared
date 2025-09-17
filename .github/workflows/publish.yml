@@ -21,39 +21,34 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build solution
-        run: dotnet build --configuration Release --no-restore
-
-      - name: Find changed projects
-        id: changed
+      - name: Find all csproj files
+        id: find_projects
         run: |
-          CHANGED_PROJECTS=""
-          for proj in $(find . -name "TagTheSpot.Services.Shared.*.csproj"); do
-            if git diff --quiet HEAD~1 HEAD -- "$proj"; then
-              echo "No changes in $proj"
-            else
-              echo "Changed: $proj"
-              CHANGED_PROJECTS="$CHANGED_PROJECTS $proj"
+          echo "projects=$(find . -name '*.csproj')" >> $GITHUB_OUTPUT
+
+      - name: Publish each project if version not published
+        run: |
+          set -e
+          for project in ${{ steps.find_projects.outputs.projects }}; do
+            echo "Processing $project"
+            version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" $project)
+            packageId=$(xmllint --xpath "string(//Project/PropertyGroup/PackageId)" $project)
+            
+            if [ -z "$packageId" ]; then
+              echo "No PackageId in $project, skipping..."
+              continue
             fi
-          done
-          echo "projects=$CHANGED_PROJECTS" >> $GITHUB_OUTPUT
 
-      - name: Pack changed libraries using .csproj version
-        if: steps.changed.outputs.projects != ''
-        run: |
-          for proj in ${{ steps.changed.outputs.projects }}; do
-            VERSION=$(dotnet msbuild "$proj" -nologo -t:GetVersion -v:q /p:OutputVersion=true | grep -oP '\d+\.\d+\.\d+')
-            echo "Packing $proj with version $VERSION"
-            dotnet pack "$proj" --configuration Release --no-build -p:PackageVersion=$VERSION
-          done
+            echo "Checking if $packageId $version exists on NuGet..."
+            if curl --silent --fail "https://api.nuget.org/v3-flatcontainer/${packageId,,}/${version}/${packageId,,}.nuspec" > /dev/null; then
+              echo "$packageId $version already exists. Skipping publish."
+              continue
+            fi
 
-      - name: Push changed packages to NuGet
-        if: steps.changed.outputs.projects != ''
-        run: |
-          for pkg in $(find . -name "*.nupkg"); do
-            echo "Pushing $pkg"
-            dotnet nuget push "$pkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+            echo "Publishing $packageId $version..."
+            dotnet pack "$project" -c Release
+            dotnet nuget push "**/$packageId.$version.nupkg" \
+              --api-key ${{ secrets.NUGET_API_KEY }} \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
           done
