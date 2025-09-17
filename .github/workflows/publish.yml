@@ -21,33 +21,36 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Install xmllint
-        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
-
-      - name: Find and publish projects
+      - name: Publish NuGet packages
         run: |
           set -e
           projects=$(find . -name "*.csproj")
 
           for project in $projects; do
             echo "Processing $project"
-            version=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" "$project")
-            packageId=$(xmllint --xpath "string(//Project/PropertyGroup/PackageId)" "$project")
 
-            if [ -z "$packageId" ]; then
-              echo "No PackageId in $project, skipping..."
+            version=$(grep -oPm1 "(?<=<Version>)[^<]+" "$project")
+            packageId=$(grep -oPm1 "(?<=<PackageId>)[^<]+" "$project")
+
+            if [ -z "$packageId" ] || [ -z "$version" ]; then
+              echo "Skipping $project because PackageId or Version not found"
               continue
             fi
 
             echo "Checking if $packageId $version exists on NuGet..."
             if curl --silent --fail "https://api.nuget.org/v3-flatcontainer/${packageId,,}/${version}/${packageId,,}.nuspec" > /dev/null; then
-              echo "$packageId $version already exists. Skipping publish."
+              echo "$packageId $version already exists. Skipping."
               continue
             fi
 
+            echo "Building $packageId..."
+            dotnet build "$project" -c Release --no-restore
+
+            echo "Packing $packageId $version..."
+            dotnet pack "$project" -c Release --no-build -o ./nupkgs
+
             echo "Publishing $packageId $version..."
-            dotnet pack "$project" -c Release
-            dotnet nuget push "**/$packageId.$version.nupkg" \
+            dotnet nuget push "./nupkgs/$packageId.$version.nupkg" \
               --api-key ${{ secrets.NUGET_API_KEY }} \
               --source https://api.nuget.org/v3/index.json \
               --skip-duplicate
