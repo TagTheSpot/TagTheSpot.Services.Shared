@@ -26,7 +26,7 @@ namespace TagTheSpot.Services.Shared.API.DependencyInjection
 
         private static string GetSwaggerXmlFile()
         {
-            return $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            return $"{Assembly.GetEntryAssembly().GetName().Name}.xml";
         }
 
         private static void ConfigureSwaggerAuthorization(SwaggerGenOptions options)
