@@ -32,19 +32,7 @@ namespace TagTheSpot.Services.Shared.Application.Extensions
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            services.Scan(scan =>
-                scan.FromAssemblies(assemblies)
-                    .AddClasses(classes => classes.AssignableTo(typeof(Mapper<,>)), publicOnly: false)
-                    .As(type =>
-                    {
-                        var baseMapperType = type.BaseType;
-
-                        return baseMapperType != null && baseMapperType.IsGenericType &&
-                               baseMapperType.GetGenericTypeDefinition() == typeof(Mapper<,>)
-                            ? [baseMapperType]
-                            : [];
-                    })
-                    .WithScopedLifetime());
+            services.AddMappersFromAssemblies(assemblies);
 
             return services;
         }
