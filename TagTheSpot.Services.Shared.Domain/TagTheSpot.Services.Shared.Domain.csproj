@@ -8,7 +8,7 @@
 
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.14</Version>
+    <Version>1.0.15</Version>
     <PackageId>TagTheSpot.Services.Shared.Domain</PackageId>
     <Authors>savchenkoad</Authors>
     <Company>TagTheSpot</Company>
