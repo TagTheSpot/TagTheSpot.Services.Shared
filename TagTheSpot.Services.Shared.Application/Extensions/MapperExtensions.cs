@@ -6,9 +6,9 @@ namespace TagTheSpot.Services.Shared.Application.Extensions
 {
     public static class MapperExtensions
     {
-        public static IServiceCollection AddMappersFromAssemblies(
+        public static IServiceCollection AddMappersFromAssembly(
             this IServiceCollection services,
-            Assembly[] assemblies)
+            params Assembly[] assemblies)
         {
             services.Scan(scan =>
                 scan.FromAssemblies(assemblies)
@@ -17,7 +17,7 @@ namespace TagTheSpot.Services.Shared.Application.Extensions
                     {
                         var baseMapperType = type.BaseType;
 
-                        return baseMapperType != null && baseMapperType.IsGenericType &&
+                        return baseMapperType is not null && baseMapperType.IsGenericType &&
                                baseMapperType.GetGenericTypeDefinition() == typeof(Mapper<,>)
                             ? [baseMapperType]
                             : [];
@@ -27,12 +27,13 @@ namespace TagTheSpot.Services.Shared.Application.Extensions
             return services;
         }
 
-        public static IServiceCollection AddAllMappers(
+        public static IServiceCollection AddMapper<TSource, TDestination, TMapper>(
             this IServiceCollection services)
+            where TSource : class
+            where TDestination : class
+            where TMapper : Mapper<TSource, TDestination>
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            services.AddMappersFromAssemblies(assemblies);
+            services.AddScoped<Mapper<TSource, TDestination>, TMapper>();
 
             return services;
         }
